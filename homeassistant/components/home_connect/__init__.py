@@ -129,7 +129,7 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
             options = [_options]
         else:
             options = None
-        _LOGGER.error("Options: %s", options)
+        _LOGGER.debug("Options: %s", options)
         appliance = _get_appliance_by_entity_id(hass, entity_id)
         if appliance is not None:
             await hass.async_add_executor_job(
