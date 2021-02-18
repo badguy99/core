@@ -12,9 +12,13 @@ import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_ENTITY_ID,
+    ATTR_SECONDS,
     CONF_CLIENT_ID,
     CONF_CLIENT_SECRET,
     CONF_DEVICE,
+    TEMP_CELSIUS,
+    TEMP_FAHRENHEIT,
+    VOLUME_MILLILITERS,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_entry_oauth2_flow, config_validation as cv
@@ -62,18 +66,25 @@ CONFIG_SCHEMA = vol.Schema(
 SERVICE_SETTING_SCHEMA = vol.Schema(
     {
         vol.Required(ATTR_ENTITY_ID): cv.entity_id,
-        vol.Required(ATTR_KEY): str,
-        vol.Required(ATTR_VALUE): vol.Coerce(str),
+        vol.Required(ATTR_KEY): cv.string,
+        vol.Required(ATTR_VALUE): vol.Any(cv.positive_int, cv.boolean, cv.string),
     }
 )
 
 SERVICE_PROGRAM_SCHEMA = vol.Schema(
     {
         vol.Required(ATTR_ENTITY_ID): cv.entity_id,
-        vol.Required(ATTR_PROGRAM): str,
-        vol.Optional(ATTR_OPTION_KEY): str,
-        vol.Optional(ATTR_OPTION_VALUE): vol.Any(int, str),
-        vol.Optional(ATTR_OPTION_UNIT): str,
+        vol.Required(ATTR_PROGRAM): cv.string,
+        vol.Optional(ATTR_OPTION_KEY): cv.string,
+        vol.Optional(ATTR_OPTION_VALUE): vol.Any(cv.positive_int, cv.string),
+        # ConsumerProducts.CoffeeMaker.Option.FillQuantity uses "ml"
+        # BSH.Common.Option.StartInRelative uses "seconds"
+        # BSH.Common.Option.Duration also uses "seconds"
+        # Cooking.Oven.Option.SetpointTemperature uses "°C" or "°F"
+        vol.Optional(ATTR_OPTION_UNIT): vol.All(
+            vol.Lower,
+            vol.Any(ATTR_SECONDS, TEMP_CELSIUS, TEMP_FAHRENHEIT, VOLUME_MILLILITERS),
+        ),
     }
 )
 
